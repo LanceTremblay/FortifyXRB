@@ -4,6 +4,8 @@
 
 FortifyXRB is a privacy-first browser extension for Brave and Chrome that lets you block posts, comments, and profiles from specific geographic regions on X (formerly Twitter). No extra tabs. No scraping. No noise.
 
+<img width="316" height="557" alt="image" src="https://github.com/user-attachments/assets/86c652ce-dc3e-4197-992d-2b2853c0f763" /> <img width="313" height="557" alt="image" src="https://github.com/user-attachments/assets/88891e15-7275-44fb-a838-31ab6dff4ac0" />
+
 ---
 
 ## ✨ Features
@@ -17,6 +19,10 @@ FortifyXRB is a privacy-first browser extension for Brave and Chrome that lets y
 - 🔁 **Real-Time** — works on your Home feed, profile pages, search results, notifications, and more
 - 🔒 **Privacy First** — no data is ever sent anywhere. Everything runs locally in your browser.
 - 🛡️ **Profile Blocking** — visiting a blocked user's profile shows a no-symbol overlay on their avatar and a region warning banner
+
+## Preview
+
+<img width="893" height="791" alt="image" src="https://github.com/user-attachments/assets/2fa9d3c0-e46b-4ace-9816-91a55c81ddfc" />
 
 ---
 
