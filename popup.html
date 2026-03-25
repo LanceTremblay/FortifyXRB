@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FortifyXRB</title>
+  <style>
+    /* System font stack — no external requests, consistent with privacy-first ethos */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: #2e2e2e;
+      --red: #ff2222;
+      --red-dim: rgba(255, 34, 34, 0.15);
+      --red-glow: rgba(255, 34, 34, 0.08);
+      --text: #f0f0f0;
+      --text-dim: #888;
+      --text-muted: #555;
+      --green: #22c55e;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    }
+
+    body {
+      width: 320px;
+      max-height: 560px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #1a0a0a, #0f0f0f);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .scroll-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .scroll-body::-webkit-scrollbar { width: 4px; }
+    .scroll-body::-webkit-scrollbar-track { background: transparent; }
+    .scroll-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .scroll-body::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    .header-icon {
+      width: 32px; height: 32px;
+      background: var(--red-dim);
+      border: 1px solid rgba(255,34,34,0.3);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+
+    .header-text h1 { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+    .header-text p  { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+
+    .v-badge {
+      margin-left: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--red);
+      color: white;
+      padding: 1px 5px;
+      border-radius: 10px;
+      letter-spacing: 0.04em;
+      vertical-align: middle;
+    }
+
+    .status-dot {
+      margin-left: auto;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px rgba(34,197,94,0.6);
+      flex-shrink: 0;
+    }
+    .status-dot.inactive { background: var(--text-muted); box-shadow: none; }
+
+    .section {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 10px;
+    }
+
+    .mode-options { display: flex; gap: 6px; }
+
+    .mode-btn {
+      flex: 1; padding: 7px 6px;
+      border-radius: 7px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-dim);
+      font-family: var(--font-sans); font-size: 11px; font-weight: 500;
+      cursor: pointer; text-align: center; transition: all 0.15s ease;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .mode-btn .mode-icon { font-size: 14px; }
+    .mode-btn:hover { border-color: rgba(255,34,34,0.3); color: var(--text); }
+    .mode-btn.active {
+      border-color: var(--red); background: var(--red-dim);
+      color: var(--text); box-shadow: 0 0 12px var(--red-glow);
+    }
+
+    .input-row { display: flex; gap: 6px; }
+
+    .region-input {
+      flex: 1; padding: 8px 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--text);
+      font-family: var(--font-mono); font-size: 12px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .region-input::placeholder { color: var(--text-muted); }
+    .region-input:focus {
+      border-color: rgba(255,34,34,0.4);
+      box-shadow: 0 0 0 2px var(--red-glow);
+    }
+
+    .add-btn {
+      padding: 8px 12px; background: var(--red);
+      border: none; border-radius: 7px; color: white;
+      font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .add-btn:hover { background: #ff4444; transform: translateY(-1px); }
+    .add-btn:active { transform: translateY(0); }
+
+    .tags-container { margin-top: 10px; min-height: 32px; }
+    .tags-empty { color: var(--text-muted); font-size: 11px; font-style: italic; padding: 6px 0; }
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 8px 4px 9px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; font-family: var(--font-mono);
+      font-size: 11px; color: var(--text);
+      animation: tagIn 0.15s ease;
+    }
+    @keyframes tagIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .tag-remove {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 13px; line-height: 1; padding: 0;
+      transition: color 0.1s; display: flex; align-items: center;
+    }
+    .tag-remove:hover { color: var(--red); }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 5px; }
+    .preset-btn {
+      padding: 4px 9px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 20px;
+      color: var(--text-dim); font-family: var(--font-sans);
+      font-size: 11px; cursor: pointer; transition: all 0.12s;
+    }
+    .preset-btn:hover {
+      border-color: rgba(255,34,34,0.35); color: var(--text);
+      background: var(--red-dim);
+    }
+
+    .api-status {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 10px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; color: var(--text-dim);
+    }
+    .api-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
+      box-shadow: 0 0 5px rgba(34,197,94,0.7);
+      animation: apiBlink 2s ease-in-out infinite;
+    }
+    @keyframes apiBlink {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+
+    .footer {
+      padding: 10px 0 2px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .count-badge { font-size: 11px; color: var(--text-muted); }
+    .count-badge span { color: var(--red); font-weight: 600; }
+
+    .clear-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-family: var(--font-sans); font-size: 11px;
+      cursor: pointer; padding: 3px 6px; border-radius: 4px; transition: all 0.12s;
+    }
+    .clear-btn:hover { color: var(--red); background: var(--red-glow); }
+
+    .toast {
+      position: fixed; bottom: 10px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-size: 11px; padding: 6px 14px;
+      border-radius: 20px; opacity: 0; transition: all 0.2s ease;
+      pointer-events: none; white-space: nowrap; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">
+      <img src="icons/icon128.png" width="20" height="20" style="display:block;" />
+    </div>
+    <div class="header-text">
+      <h1>FortifyXRB <span class="v-badge">v1.0</span></h1>
+      <p>API-Level Location Filtering</p>
+    </div>
+    <div class="status-dot" id="statusDot"></div>
+  </div>
+
+  <div class="scroll-body">
+
+    <div class="section">
+      <div class="section-label">Block Mode</div>
+      <div class="mode-options">
+        <button class="mode-btn" data-mode="overlay">
+          <span class="mode-icon"><img src="icons/icon128.png" width="18" height="18" style="display:block;margin:0 auto;" /></span>Overlay
+        </button>
+        <button class="mode-btn" data-mode="blur">
+          <span class="mode-icon">🌫️</span>Blur
+        </button>
+        <button class="mode-btn" data-mode="hide">
+          <span class="mode-icon">🙈</span>Hide
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Blocked Regions</div>
+      <div class="input-row">
+        <input class="region-input" id="regionInput" type="text"
+          placeholder="Ex: India, Nigeria, South Asia..." maxlength="60" />
+        <button class="add-btn" id="addBtn">Add</button>
+      </div>
+      <div class="tags-container" id="tagsContainer">
+        <div class="tags-empty" id="tagsEmpty">No regions added yet.</div>
+        <div class="tags" id="tagsList"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Quick Presets</div>
+      <div class="presets" id="presets">
+        <button class="preset-btn" data-region="India">🇮🇳 India</button>
+        <button class="preset-btn" data-region="South Asia">🌏 South Asia</button>
+        <button class="preset-btn" data-region="West Asia">🌍 West Asia</button>
+        <button class="preset-btn" data-region="Nigeria">🇳🇬 Nigeria</button>
+        <button class="preset-btn" data-region="Africa">🌍 Africa</button>
+        <button class="preset-btn" data-region="Israel">🇮🇱 Israel</button>
+        <button class="preset-btn" data-region="Russia">🇷🇺 Russia</button>
+        <button class="preset-btn" data-region="China">🇨🇳 China</button>
+        <button class="preset-btn" data-region="Iran">🇮🇷 Iran</button>
+        <button class="preset-btn" data-region="North Korea">🇰🇵 N. Korea</button>
+        <button class="preset-btn" data-region="Belarus">🇧🇾 Belarus</button>
+        <button class="preset-btn" data-region="Syria">🇸🇾 Syria</button>
+      </div>
+      <div class="footer">
+        <div class="count-badge"><span id="blockedCount">0</span> region(s) active</div>
+        <button class="clear-btn" id="clearBtn">Clear all</button>
+      </div>
+    </div>
+
+    <div class="section" style="border-bottom: none;">
+      <div class="section-label">Detection Engine</div>
+      <div class="api-status">
+        <div class="api-dot"></div>
+        <span>Intercepting X API responses in real-time</span>
+      </div>
+    </div>
+
+  </div><!-- end scroll-body -->
+
+  <div class="toast" id="toast"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
